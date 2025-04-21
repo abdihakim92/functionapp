@@ -34,3 +34,10 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
+    
+      - name: Deploy Azure Function Code
+        working-directory: ${{ github.workspace }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y azure-functions-core-tools-4
+          func azure functionapp publish compoundcalc-func --python
