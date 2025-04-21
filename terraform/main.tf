@@ -33,6 +33,7 @@ resource "azurerm_application_insights" "insights" {
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
   application_type    = "web"
+  workspace_id        = "/subscriptions/e34ede12-80d3-456c-8082-acbab17cda3d/resourceGroups/ai_compoundcalc-func-ai_dc23c186-fa8b-4af5-b5a0-0b320922e68d_managed/providers/Microsoft.OperationalInsights/workspaces/managed-compoundcalc-func-ai-ws"
 }
 
 resource "azurerm_linux_function_app" "function_app" {
