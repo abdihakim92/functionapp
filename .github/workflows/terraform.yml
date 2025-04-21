@@ -19,6 +19,13 @@ jobs:
         
       - uses: hashicorp/setup-terraform@v3
 
+      - name: Set Azure Auth Environment Variables
+        run: |
+          echo "ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=$(az account show --query tenantId -o tsv)" >> $GITHUB_ENV
+          echo "ARM_CLIENT_ID=$(az ad signed-in-user show --query id -o tsv)" >> $GITHUB_ENV
+
+
       - name: Terraform Init
         run: terraform init
 
