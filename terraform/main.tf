@@ -27,6 +27,14 @@ resource "azurerm_app_service_plan" "asp" {
   }
 }
 
+
+resource "azurerm_application_insights" "insights" {
+  name                = "${var.function_app_name}-ai"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+  application_type    = "web"
+}
+
 resource "azurerm_linux_function_app" "function_app" {
   name                       = var.function_app_name
   location                   = data.azurerm_resource_group.rg.location
@@ -35,14 +43,16 @@ resource "azurerm_linux_function_app" "function_app" {
   storage_account_name       = azurerm_storage_account.storage.name
   storage_account_access_key = azurerm_storage_account.storage.primary_access_key
 
+  app_settings = {
+    "FUNCTIONS_WORKER_RUNTIME"              = "python"
+    "AzureWebJobsStorage"                   = azurerm_storage_account.storage.primary_connection_string
+    "APPINSIGHTS_INSTRUMENTATIONKEY"        = azurerm_application_insights.insights.instrumentation_key
+    "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.insights.connection_string
+  }
+
   site_config {
     application_stack {
       python_version = "3.10"
     }
-  }
-
-  app_settings = {
-    "FUNCTIONS_WORKER_RUNTIME" = "python"
-    "AzureWebJobsStorage"      = azurerm_storage_account.storage.primary_connection_string
   }
 }
