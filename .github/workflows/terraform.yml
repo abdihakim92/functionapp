@@ -64,7 +64,7 @@ jobs:
 
       - name: Test function with curl
         run: |
-          RESPONSE=$(curl -s -X POST https://compoundcalc-func.azurewebsites.net/api/CompoundInterestFunction \
+          RESPONSE=$(curl -s -X POST https://compoundcalc-func.azurewebsites.net/api/CompoundCalculator \
             -H "Content-Type: application/json" \
             -d '{"principal": 1000, "rate": 5, "time": 2, "n": 4}')
 
