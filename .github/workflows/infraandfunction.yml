@@ -1,0 +1,62 @@
+name: Infra + Function Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    if: contains(github.event.head_commit.message, '[infra]') || contains(github.event.head_commit.message, '[all]')
+    runs-on: self-hosted
+
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Set Azure Auth Environment Variables
+        run: |
+          echo "ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=$(az account show --query tenantId -o tsv)" >> $GITHUB_ENV
+          echo "ARM_CLIENT_ID=$(az ad signed-in-user show --query id -o tsv)" >> $GITHUB_ENV
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+  deploy-function:
+    needs: terraform
+    if: contains(github.event.head_commit.message, '[app]') || contains(github.event.head_commit.message, '[all]')
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Deploy Azure Function
+        run: func azure functionapp publish compoundcalc-func --python
+
+  test-function:
+    needs: deploy-function
+    runs-on: self-hosted
+
+    steps:
+      - name: Wait for function app to warm up
+        run: sleep 15
+
+      - name: Test function
+        run: |
+          RESPONSE=$(curl -s -X POST https://compoundcalc-func.azurewebsites.net/api/CompoundCalculator \
+            -H "Content-Type: application/json" \
+            -d '{"principal": 1000, "rate": 5, "time": 2, "n": 4}')
+
+          echo "Response: $RESPONSE"
+          echo "$RESPONSE" | grep -q '"compound_interest":' || exit 1

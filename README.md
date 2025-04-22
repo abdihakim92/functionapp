@@ -1,4 +1,5 @@
-![Build Status](https://github.com/abdhakim92/functionapp/actions/workflows/terraform.yml/badge.svg)
+![Deploy Function](https://github.com/abdihakim92/functionapp/actions/workflows/infraandfunction.yml/badge.svg)
+
 
 # Technical Task: Deploying a Function App for Compound Interest Calculation
 
