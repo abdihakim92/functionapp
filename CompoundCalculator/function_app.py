@@ -1,21 +1,31 @@
 import azure.functions as func
+import json
 import logging
 
-app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
+app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 @app.route(route="CompoundCalculator")
-def CompoundCalculator(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Python HTTP trigger function processed a request.')
+def compound_calculator(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Processing compound interest calculation.')
 
     try:
         req_body = req.get_json()
-        principal = req_body.get('principal')
-        rate = req_body.get('rate')
-        time = req_body.get('time')
-        n = req_body.get('n')
-        amount = principal * (1 + rate / n) ** (n * time)
+        principal = float(req_body.get('principal'))
+        rate = float(req_body.get('rate'))
+        time = float(req_body.get('time'))
+        n = float(req_body.get('n'))
+
+        amount = principal * (1 + (rate / (100 * n))) ** (n * time)
+        result = round(amount, 2)
+
+        return func.HttpResponse(
+            json.dumps({"compound_interest": result}),
+            status_code=200,
+            mimetype="application/json"
+        )
+
     except Exception as e:
-        logging.error(f"Exception occurred: {str(e)}")
-        return func.HttpResponse("Error occurred in compound calculation",status_code=400)
-    else:
-        return func.HttpResponse(f"The answer is {amount}")
+        return func.HttpResponse(
+            f"Error: {str(e)}",
+            status_code=400
+        )
