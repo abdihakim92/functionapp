@@ -7,7 +7,6 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 @app.route(route="CompoundCalculator")
 def compound_calculator(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Processing compound interest calculation.')
-
     try:
         req_body = req.get_json()
         principal = float(req_body.get('principal'))
